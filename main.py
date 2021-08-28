@@ -1,4 +1,6 @@
 from flask import Flask, request, abort
+import pya3rt
+import os
 
 from linebot import (
     LineBotApi, WebhookHandler
@@ -37,10 +39,21 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    # リプライを作成する
+    reply = create_reply(event.message.text)
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=event.message.text))
+        # 実際にcreate_replyの返り値をTextMessageの引数として渡してます。
+        TextSendMessage(text=reply))
 
+def create_reply(user_text):
+  apikey = "DZZFhClriEa1buFNvETvFYxYxrln3Mxu"
+  client = pya3rt.TalkClient(apikey)
+  res = client.talk(user_text)
+
+  return res['results'][0]['reply']
 
 if __name__ == "__main__":
+    port = int(os.getenv("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
     app.run()
